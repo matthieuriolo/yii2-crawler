@@ -1,208 +1,113 @@
-Yii 2 Basic Project Template
-============================
+yii2-crawler
+===============
 
-Yii 2 Basic Project Template is a skeleton [Yii 2](http://www.yiiframework.com/) application best for
-rapidly creating small projects.
+Reusable multithreaded data crawler for the web based on the [yii2 framework](http://www.yiiframework.com)
 
-The template contains the basic features including user login/logout and a contact page.
-It includes all commonly used configurations that would allow you to focus on adding new
-features to your application.
+# Yii2 Crawler
+The crawler is based on the [FIFO](https://en.wikipedia.org/wiki/FIFO_(computing_and_electronics)) principle with a small tweak. A delay resulting into priorities. The tasks will be sorted by their creation time and then the task will be excluded depending when the last request to a host has been. This gives devs an easy way to control the amount of requests per host, however the order is not always garanteed since a task with a shorter delay time always will be performed before a task with a longer delay time (hence prioritized). If you need to ensure a order, have a look at the prioritized task field. Thanks to meta informations the crawler can store additional informations aswell. 
 
-[![Latest Stable Version](https://poser.pugx.org/yiisoft/yii2-app-basic/v/stable.png)](https://packagist.org/packages/yiisoft/yii2-app-basic)
-[![Total Downloads](https://poser.pugx.org/yiisoft/yii2-app-basic/downloads.png)](https://packagist.org/packages/yiisoft/yii2-app-basic)
-[![Build Status](https://travis-ci.org/yiisoft/yii2-app-basic.svg?branch=master)](https://travis-ci.org/yiisoft/yii2-app-basic)
+However the module does not provide any tools for analyzing the requested data and focuses on the job of requesting data in controlled manner.
 
-DIRECTORY STRUCTURE
--------------------
+## License
+GPL-2
 
-      assets/             contains assets definition
-      commands/           contains console commands (controllers)
-      config/             contains application configurations
-      controllers/        contains Web controller classes
-      mail/               contains view files for e-mails
-      models/             contains model classes
-      runtime/            contains files generated during runtime
-      tests/              contains various tests for the basic application
-      vendor/             contains dependent 3rd-party packages
-      views/              contains view files for the Web application
-      web/                contains the entry script and Web resources
+## Requirements
 
+- Yii2 (2.0.13)
+- [Curl](https://github.com/linslin/Yii2-Curl) 
 
+## costumizable priorities
 
-REQUIREMENTS
-------------
-
-The minimum requirement by this project template that your Web server supports PHP 5.4.0.
-
-
-INSTALLATION
-------------
-
-### Install via Composer
-
-If you do not have [Composer](http://getcomposer.org/), you may install it by following the instructions
-at [getcomposer.org](http://getcomposer.org/doc/00-intro.md#installation-nix).
-
-You can then install this project template using the following command:
-
-~~~
-php composer.phar global require "fxp/composer-asset-plugin:^1.3.1"
-php composer.phar create-project --prefer-dist --stability=dev yiisoft/yii2-app-basic basic
-~~~
-
-Now you should be able to access the application through the following URL, assuming `basic` is the directory
-directly under the Web root.
-
-~~~
-http://localhost/basic/web/
-~~~
-
-
-### Install from an Archive File
-
-Extract the archive file downloaded from [yiiframework.com](http://www.yiiframework.com/download/) to
-a directory named `basic` that is directly under the Web root.
-
-Set cookie validation key in `config/web.php` file to some random secret string:
+You can configure your own priorities by changing the initialization configuration of the crawler module
 
 ```php
-'request' => [
-    // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
-    'cookieValidationKey' => '<secret random string goes here>',
+'modules' => [
+    'crawler' => [
+        'class' => 'app\modules\crawler\Module',
+        'priorities' => [
+            'custom' => [
+                'label' => 'My custom priority',
+                'delay' => 30,
+
+                'max_fetches' => 10,
+                'max_imports' => 1,
+
+                'unlock_after' => 60 * 60 * 24 * 7,
+            ],
+        ],
+    ],
 ],
 ```
 
-You can then access the application through the following URL:
+- label: Name of your priority
+- delay: Delayed requests for the same host in seconds
+- max_fetches: Maximal counter limit for retrieving data from an URL
+- max_imports: How often the import counter can be increased until the crawler will recognize it as failed
+- unlock_after: The cleanup script will only unlock tasks which have been longer than the given seconds
 
-~~~
-http://localhost/basic/web/
-~~~
+## Using the crawler across multiple applications
+It is recommand to install the crawler in an indepented yii2 instance. There is a task command and a task controller for retrieving the status of the crawler. Use the ability of yii2 to set up a second database connection if you want to access the crawler data from an external application.
 
-
-CONFIGURATION
--------------
-
-### Database
-
-Edit the file `config/db.php` with real data, for example:
 
 ```php
-return [
-    'class' => 'yii\db\Connection',
-    'dsn' => 'mysql:host=localhost;dbname=yii2basic',
-    'username' => 'root',
-    'password' => '1234',
-    'charset' => 'utf8',
-];
+'components' => [
+    'db' => ['default db settings'],
+    'db_crawler' => ['additional db settings'],
+],
+
+'modules' => [
+    'crawler' => [
+        'class' => 'app\modules\crawler\Module',
+        'db' => 'db_crawler'
+    ]
+]
 ```
 
-**NOTES:**
-- Yii won't create the database for you, this has to be done manually before you can access it.
-- Check and edit the other files in the `config/` directory to customize your application as required.
-- Refer to the README in the `tests` directory for information specific to basic application tests.
+## Accessing data
+
+The crawler provides some default queries for accessing the data
+```php
+use app\modules\crawler\models\Task;
+
+# next task in upcoming
+$task = Task::nextTask();
 
 
-
-TESTING
--------
-
-Tests are located in `tests` directory. They are developed with [Codeception PHP Testing Framework](http://codeception.com/).
-By default there are 3 test suites:
-
-- `unit`
-- `functional`
-- `acceptance`
-
-Tests can be executed by running
-
-```
-vendor/bin/codecept run
-``` 
-
-The command above will execute unit and functional tests. Unit tests are testing the system components, while functional
-tests are for testing user interaction. Acceptance tests are disabled by default as they require additional setup since
-they perform testing in real browser. 
-
-
-### Running  acceptance tests
-
-To execute acceptance tests do the following:  
-
-1. Rename `tests/acceptance.suite.yml.example` to `tests/acceptance.suite.yml` to enable suite configuration
-
-2. Replace `codeception/base` package in `composer.json` with `codeception/codeception` to install full featured
-   version of Codeception
-
-3. Update dependencies with Composer 
-
-    ```
-    composer update  
-    ```
-
-4. Download [Selenium Server](http://www.seleniumhq.org/download/) and launch it:
-
-    ```
-    java -jar ~/selenium-server-standalone-x.xx.x.jar
-    ```
-
-    In case of using Selenium Server 3.0 with Firefox browser since v48 or Google Chrome since v53 you must download [GeckoDriver](https://github.com/mozilla/geckodriver/releases) or [ChromeDriver](https://sites.google.com/a/chromium.org/chromedriver/downloads) and launch Selenium with it:
-
-    ```
-    # for Firefox
-    java -jar -Dwebdriver.gecko.driver=~/geckodriver ~/selenium-server-standalone-3.xx.x.jar
-    
-    # for Google Chrome
-    java -jar -Dwebdriver.chrome.driver=~/chromedriver ~/selenium-server-standalone-3.xx.x.jar
-    ``` 
-    
-    As an alternative way you can use already configured Docker container with older versions of Selenium and Firefox:
-    
-    ```
-    docker run --net=host selenium/standalone-firefox:2.53.0
-    ```
-
-5. (Optional) Create `yii2_basic_tests` database and update it by applying migrations if you have them.
-
-   ```
-   tests/bin/yii migrate
-   ```
-
-   The database configuration can be found at `config/test_db.php`.
-
-
-6. Start web server:
-
-    ```
-    tests/bin/yii serve
-    ```
-
-7. Now you can run all available tests
-
-   ```
-   # run all available tests
-   vendor/bin/codecept run
-
-   # run acceptance tests
-   vendor/bin/codecept run acceptance
-
-   # run only unit and functional tests
-   vendor/bin/codecept run unit,functional
-   ```
-
-### Code coverage support
-
-By default, code coverage is disabled in `codeception.yml` configuration file, you should uncomment needed rows to be able
-to collect code coverage. You can run your tests and collect coverage with the following command:
-
-```
-#collect coverage for all tests
-vendor/bin/codecept run -- --coverage-html --coverage-xml
-
-#collect coverage only for unit tests
-vendor/bin/codecept run unit -- --coverage-html --coverage-xml
-
-#collect coverage for unit and functional tests
-vendor/bin/codecept run functional,unit -- --coverage-html --coverage-xml
+#all upcoming tasks
+$query = Task::upcomingQuery();
+#all downloaded but unimported tasks
+$query = Task::pendingQuery();
+#all failed tasks
+$query = Task::failedQuery();
 ```
 
-You can see code coverage output under the `tests/_output` directory.
+## Meta informations
+
+```php
+$task = Task::findOne($id);
+
+# get meta value
+echo $task->getMetaValue('class');
+# set meta value
+$task->setMetaValue('class', CustomTaskInfo::className());
+#delete meta value
+$task->deleteMetaValue('typoClASssss');
+```
+
+
+## Logging
+
+not really supported yet
+
+## Prioritized Tasks
+A task can point to a prioritized Task which must be executed or must have failed before the crawler starts to execute the main task. Keep in mind that deadlocks (circularity) are possible and must be avoided. If the order of the task are important, you can use this field to ensure an order.
+
+
+## Multithread
+Well, I lied. It's not really multithreaded. But the module can be installed in a own instance of yii2 and with the following command the task manager can be scheduled
+```sh
+./yii crawler/task/process
+```
+The process command will run for infinite amount of time. Every time the task manager is about to download a file, the task will be locked. This field can also be used for the external import thread to ensure that other threads do not corrupt the data pool.
+
+This means the application itself is not multithreaded but as long as you have a mysql backend you should be able to run the same application (import/export) multiple times with the same data
