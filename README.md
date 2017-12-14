@@ -43,10 +43,10 @@ You can configure your own priorities by changing the initialization configurati
 - delay: Delayed requests for the same host in seconds
 - max_fetches: Maximal counter limit for retrieving data from an URL
 - max_imports: How often the import counter can be increased until the crawler will recognize it as failed
-- unlock_after: The cleanup script will only unlock tasks which have been longer than the given seconds
+- unlock_after: The cleanup script will only unlock tasks which have been longer locked than the given seconds
 
 ## Using the crawler across multiple applications
-It is recommand to install the crawler in an indepented yii2 instance. There is a task command and a task controller for retrieving the status of the crawler. Use the ability of yii2 to set up a second database connection if you want to access the crawler data from an external application.
+It is recommanded to install the crawler in an independent yii2 instance. There is a task command and a task controller for retrieving the status of the crawler. Use the ability of yii2 to set up a second database connection if you want to access the crawler data from an external application.
 
 
 ```php

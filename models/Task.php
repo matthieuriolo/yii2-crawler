@@ -446,7 +446,7 @@ class Task extends \yii\db\ActiveRecord
             #only unlocked
             ->andWhere(['IS', Task::tableName() . '.locked', null])
 
-            #only those whose prioritized task is already completey (or havent one)
+            #only those whose prioritized task is already completed (or havent one)
             #or the prioritized task has failed
             ->andWhere([
                 'or',

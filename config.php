@@ -5,7 +5,7 @@ return [
 	'userAgent' => 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13',
 
 	#schedule sleeper
-	'sleep' => 10, #10 sec sleep time if no work
+	'sleep' => defined('YII_ENV') && YII_ENV == 'dev' ? 10 : 1, #10 sec (in production 1 sec) sleep time if no work
 	
 	#which log file
 	#'logFile' => '@app/runtime/logs/crawler.log',
