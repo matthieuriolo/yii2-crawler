@@ -43,7 +43,7 @@ class Host extends \yii\db\ActiveRecord
 
 
 
-    public function getDb() {
+    static public function getDb() {
         return Yii::$app->getModule('crawler')->db;
     }
     
