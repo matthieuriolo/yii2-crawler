@@ -397,8 +397,9 @@ class Task extends \yii\db\ActiveRecord
     
     public static function failedQuery() {
         $query = self::find()
-            ->andWhere(['IS', 'locked', null])
-            ->orderBy('failed_import_count DESC, failed DESC')
+            ->from(['failedTask' => self::tableName()])
+            ->andWhere(['IS', 'failedTask.locked', null])
+            ->orderBy('failedTask.failed_import_count DESC, failedTask.failed DESC')
         ;
 
         $conditions = ['or'];
@@ -407,17 +408,17 @@ class Task extends \yii\db\ActiveRecord
 
             $conditions[] = [
                 'and',
-                ['=', 'priority', $prio],
-                ['IS NOT', 'failed', null],
-                ['>=', 'failed_count', $config['max_fetches']],
+                ['=', 'failedTask.priority', $prio],
+                ['IS NOT', 'failedTask.failed', null],
+                ['>=', 'failedTask.failed_count', $config['max_fetches']],
             ];
 
 
             $conditions[] = [
                 'and',
-                ['=', 'priority', $prio],
-                ['IS NOT', 'failed_import', null],
-                ['>=', 'failed_import_count', $config['max_imports']],
+                ['=', 'failedTask.priority', $prio],
+                ['IS NOT', 'failedTask.failed_import', null],
+                ['>=', 'failedTask.failed_import_count', $config['max_imports']],
             ];
         }
 
@@ -429,14 +430,15 @@ class Task extends \yii\db\ActiveRecord
     
     public static function pendingQuery() {
         $query = self::find()
-            ->andWhere(['IS', 'imported', null])
-            ->andWhere(['IS', 'locked', null])
-            ->andWhere(['IS NOT', 'file', null])
-            ->andWhere(['NOT IN ', 'id', self::failedQuery()->select('id')])
+            ->from(['pendingTask' => self::tableName()])
+            ->andWhere(['IS', 'pendingTask.imported', null])
+            ->andWhere(['IS', 'pendingTask.locked', null])
+            ->andWhere(['IS NOT', 'pendingTask.file', null])
+            ->andWhere(['NOT IN ', 'pendingTask.id', self::failedQuery()->select('failedTask.id')])
 
 
             #order by oldest failed then by oldest task
-            ->orderBy('downloaded DESC, created DESC')
+            ->orderBy('pendingTask.downloaded DESC, pendingTask.created DESC')
         ;
 
         return $query;
@@ -445,29 +447,30 @@ class Task extends \yii\db\ActiveRecord
 
     public static function upcomingQuery() {
         return self::find()
+            ->from(['upcomingTask' => self::tableName()])
             #join with host und prioritizedTask
             ->joinWith(['host as host', 'prioritizedTask as prioritizedTask'])
 
 
             #only entries without a file
-            ->andWhere(['IS', Task::tableName() . '.file', null])
+            ->andWhere(['IS', 'upcomingTask.file', null])
             #only unlocked
-            ->andWhere(['IS', Task::tableName() . '.locked', null])
+            ->andWhere(['IS', 'upcomingTask.locked', null])
 
             #only those whose prioritized task is already completed (or havent one)
             #or the prioritized task has failed
             ->andWhere([
                 'or',
-                ['IS', Task::tableName() . '.prioritized_task_id', null],
+                ['IS', 'upcomingTask.prioritized_task_id', null],
                 ['IS NOT', 'prioritizedTask.file', null],
-                ['IN', self::tableName() . '.prioritized_task_id', self::failedQuery()->select('id')]
+                ['IN', 'upcomingTask.prioritized_task_id', self::failedQuery()->select('failedTask.id')]
             ])
 
             # which have not comletely failed yet
-            ->andWhere(['NOT IN ', self::tableName() . '.id', self::failedQuery()->select('id')])
+            ->andWhere(['NOT IN ', 'upcomingTask.id', self::failedQuery()->select('failedTask.id')])
 
             #order by oldest failed then by oldest creation
-            ->orderBy(Task::tableName() . '.failed ASC, ' . Task::tableName() . '.created ASC')
+            ->orderBy('upcomingTask.failed ASC, ' . 'upcomingTask.created ASC')
         ;
     }
 
@@ -480,8 +483,8 @@ class Task extends \yii\db\ActiveRecord
 
             $conditions[] = [
                 'and',
-                ['=', 'priority', $prio],
-                ['<', 'failed_count', $config['max_fetches']],
+                ['=', 'upcomingTask.priority', $prio],
+                ['<', 'upcomingTask.failed_count', $config['max_fetches']],
                 [
                     'or',
                     ['<=', 'host.crawled', new Expression('NOW() - INTERVAL ' . $config['delay']. ' SECOND')],
