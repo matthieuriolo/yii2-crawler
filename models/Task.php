@@ -164,6 +164,14 @@ class Task extends \yii\db\ActiveRecord
         return true;
     }
 
+    public function getFileContent() {
+        if($this->file) {
+            return @file_get_contents(Yii::getAlias(Yii::$app->getModule('crawler')->filesDir) . $this->file);
+        }
+
+        return null;
+    }
+
     /**
      * @return \yii\db\ActiveQuery
      */
