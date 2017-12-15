@@ -238,7 +238,7 @@ class Task extends \yii\db\ActiveRecord
         }
 
         if(($old = $this->getMetaRecord($name)) && $old->id != $meta->id) {
-            $this->unlink('metas', $old);
+            $this->unlink('metas', $old, true);
         }
 
         if(!$this->hasMetaRecord($meta)) {

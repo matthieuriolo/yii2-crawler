@@ -20,14 +20,6 @@ $this->title = 'My Crawler';
     </div>
 
     <div class="body-content">
-        <div class="alert alert-warning">
-            <h3>Todo</h3>
-            <ul>
-                <li>cleanup script for failed taks (download or import)</li>
-            </ul>
-        </div>
-
-
         <p>
             <?= Html::a(Yii::t('app', 'Cronjob'), ['/crawler/task/cleanup'], [
                 'class' => 'btn btn-danger',
