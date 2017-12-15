@@ -11,7 +11,10 @@ class Module extends \yii\base\Module {
 	public $db = 'db';
 	public $userAgent;
 	public $sleep;
-	public $filesDir;
+	
+	# file destination
+	public $filesDir = '@app/runtime/crawler/';
+
 	public $defaultPriority;
 	public $priorities;
 

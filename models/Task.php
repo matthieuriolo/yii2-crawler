@@ -166,7 +166,7 @@ class Task extends \yii\db\ActiveRecord
 
     public function getFileContent() {
         if($this->file) {
-            return @file_get_contents(Yii::getAlias(Yii::$app->getModule('crawler')->filesDir) . $this->file);
+            return file_get_contents(Yii::getAlias(Yii::$app->getModule('crawler')->filesDir) . $this->file);
         }
 
         return null;
@@ -238,7 +238,7 @@ class Task extends \yii\db\ActiveRecord
         }
 
         if(($old = $this->getMetaRecord($name)) && $old->id != $meta->id) {
-            $old->delete();
+            $this->unlink('metas', $old);
         }
 
         if(!$this->hasMetaRecord($meta)) {

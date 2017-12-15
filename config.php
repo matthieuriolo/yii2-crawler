@@ -13,7 +13,7 @@ return [
 	#'logType' => ['error', 'redirect', 'warning'],
 
 	# file destination
-	'filesDir' => '@app/runtime/crawler/',
+	#'filesDir' => '@app/runtime/crawler/',
 
 	
 	'defaultPriority' => [
