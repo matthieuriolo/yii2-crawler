@@ -220,8 +220,8 @@ class Task extends \yii\db\ActiveRecord
 
     public function setMetaValue($name, $value = null) {
         $meta = Meta::find()
-            ->andWhere(['LIKE', 'name', $name])
-            ->andWhere(is_null($value) ? ['IS', 'value', $value] : ['=', 'value', $value])
+            ->andWhere(['=', 'name', $name])
+            ->andWhere(is_null($value) ? ['IS', 'value', $value] : ['=', 'value', (string)$value])
             ->one()
         ;
 
@@ -229,7 +229,7 @@ class Task extends \yii\db\ActiveRecord
             # doesnt exist yet
             $meta = new Meta([
                 'name' => $name,
-                'value' => $value,
+                'value' => (string)$value,
             ]);
     
             if(!$meta->save()) {
@@ -258,7 +258,7 @@ class Task extends \yii\db\ActiveRecord
         if($name instanceof Meta) {
             return $this->getTaskMetas()->andWhere(['=', 'meta_id', $name->id])->one();
         }else if(is_string($name)) {
-            return $this->getMetas()->andWhere(['LIKE', 'name', $name])->one();
+            return $this->getMetas()->andWhere(['=', 'name', $name])->one();
         }
 
         return null;
