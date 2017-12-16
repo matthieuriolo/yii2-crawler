@@ -9,14 +9,52 @@ use yii\di\Instance;
 
 class Module extends \yii\base\Module {
 	public $db = 'db';
-	public $userAgent;
-	public $sleep;
+	# you can define an own name for your crawler but this makes it easy to detect if your crawler accesses a page
+	public $userAgent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13';
+	
+	# schedule sleeper
+	public $sleep = null;
 	
 	# file destination
 	public $filesDir = '@app/runtime/crawler/';
 
-	public $defaultPriority;
-	public $priorities;
+	# default settings accross all priorities
+	public $defaultPriority = [
+		'delay' => 60, # seconds - task will wait at least given seconds for the same host,
+        'max_fetches' => 3, # int+ - attempts for downloading file
+        'max_imports' => 3, # int+ - attempts for external thread to import task
+        'clean_after' => 60 * 60 * 24 * 360, # seconds - seconds for a delayed deletion after failed download or imports
+        'unlock_after' => 60 * 60 * 24, # seconds - seconds for a delayed unlock
+	];
+
+
+	# common priorities
+	public $priorities = [
+    	'urgent' => [
+    		'label' => 'Urgent',
+    		'delay' => 1, # asap
+
+    		'max_fetches' => 1,
+    		'max_imports' => 1,
+
+    		'unlock_after' => 60 * 60,
+    	],
+
+    	'important' => [
+    		'label' => 'Important',
+    		'delay' => 60 * 1, # 1min
+    	],
+
+    	'normal' => [
+    		'label' => 'Normal',
+    		'delay' => 60 * 10, # 10min
+    	],
+
+    	'unimportant' => [
+    		'label' => 'Unimportant',
+    		'delay' => 60 * 60, # 60min
+    	],
+	];
 
     public function init() {
         parent::init();
@@ -27,6 +65,10 @@ class Module extends \yii\base\Module {
 			$this->controllerNamespace = 'app\modules\crawler\commands';
 		}
 
-        Yii::configure($this, require __DIR__ . '/config.php');
+
+        if(!is_int($this->sleep) || $this->sleep < 1) {
+        	#10 sec (in production 1 sec) sleep time if no work
+        	$this->sleep = defined('YII_ENV') && YII_ENV == 'dev' ? 10 : 1;
+        }
     }
 }

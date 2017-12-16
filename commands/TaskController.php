@@ -156,11 +156,13 @@ class TaskController extends Controller {
         if (($model = Task::findOne($id)) !== null) {
             return $model;
         } else {
-            throw new Exception('The requested page does not exist.');
+            throw new Exception('A task with the given identifier does not exist.');
         }
     }
 
     public function actionProcess() {
+    	echo "Sleep scheduler is set to " . Yii::$app->controller->module->sleep . "\n";
+    	
         while(true) {
         	try {
 	        	if($crawler = Task::nextTask()) {
@@ -187,8 +189,8 @@ class TaskController extends Controller {
 	        		}
 	        	}else if(Yii::$app->controller->module->sleep > 0) {
 	        		# sleep
-	        		$this->stdout("No work\n");
-	        		Yii::warning('no work', 'crawler');
+	        		#$this->stdout("No work\n");
+	        		#Yii::warning('no work', 'crawler');
 	        		sleep(Yii::$app->controller->module->sleep);
 	        	}
 	        }catch(Exception $e) {
