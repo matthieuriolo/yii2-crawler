@@ -52,7 +52,7 @@ class Module extends \yii\base\Module {
 
     	'unimportant' => [
     		'label' => 'Unimportant',
-    		'delay' => 3600, # 1hour
+    		'delay' => 64800, # 18 hours
     	],
 	];
 
