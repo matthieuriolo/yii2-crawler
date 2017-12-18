@@ -76,7 +76,7 @@ class Task extends \yii\db\ActiveRecord
             #[['priority'], 'string', 'max' => 255],
             
             [['host_id'], 'exist', 'skipOnError' => true, 'targetClass' => Host::className(), 'targetAttribute' => ['host_id' => 'id']],
-            [['prioritized_task_id'], 'exist', 'skipOnError' => true, 'targetClass' => Task::className(), 'targetAttribute' => ['priotized_task_id' => 'id']],
+            [['prioritized_task_id'], 'exist', 'skipOnError' => true, 'targetClass' => Task::className(), 'targetAttribute' => ['prioritized_task_id' => 'id']],
         ];
     }
 
