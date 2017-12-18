@@ -23,8 +23,8 @@ class Module extends \yii\base\Module {
 		'delay' => 60, # seconds - task will wait at least given seconds for the same host,
         'max_fetches' => 3, # int+ - attempts for downloading file
         'max_imports' => 3, # int+ - attempts for external thread to import task
-        'clean_after' => 60 * 60 * 24 * 360, # seconds - seconds for a delayed deletion after failed download or imports
-        'unlock_after' => 60 * 60 * 24, # seconds - seconds for a delayed unlock
+        'clean_after' => 31104000, # seconds - seconds for a delayed deletion after failed download or imports
+        'unlock_after' => 86400, # seconds - seconds for a delayed unlock
 	];
 
 
@@ -37,22 +37,22 @@ class Module extends \yii\base\Module {
     		'max_fetches' => 1,
     		'max_imports' => 1,
 
-    		'unlock_after' => 60 * 60,
+    		'unlock_after' => 3600,
     	],
 
     	'important' => [
     		'label' => 'Important',
-    		'delay' => 60 * 1, # 1min
+    		'delay' => 60, # 1min
     	],
 
     	'normal' => [
     		'label' => 'Normal',
-    		'delay' => 60 * 10, # 10min
+    		'delay' => 600, # 10min
     	],
 
     	'unimportant' => [
     		'label' => 'Unimportant',
-    		'delay' => 60 * 60, # 60min
+    		'delay' => 64800, # 18 hours
     	],
 	];
 
