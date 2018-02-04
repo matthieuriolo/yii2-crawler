@@ -9,6 +9,7 @@ use yii\di\Instance;
 
 class Module extends \yii\base\Module {
 	public $db = 'db';
+
 	# you can define an own name for your crawler but this makes it easy to detect if your crawler accesses a page
 	public $userAgent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13';
 	
@@ -25,6 +26,15 @@ class Module extends \yii\base\Module {
         'max_imports' => 3, # int+ - attempts for external thread to import task
         'clean_after' => 31104000, # seconds - seconds for a delayed deletion after failed download or imports
         'unlock_after' => 86400, # seconds - seconds for a delayed unlock
+        
+        /*
+        # this config allows you to make sure the crawler executes tasks during a certain time
+        # remove the entry from the defaultPriority and the crawler will ignore it
+        'workingHours' => [
+            ['8:00', '12:00'],
+            ['13:00', '17:00'],
+        ],
+        */
 	];
 
 

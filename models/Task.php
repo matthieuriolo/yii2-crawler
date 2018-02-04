@@ -469,7 +469,7 @@ class Task extends \yii\db\ActiveRecord
             # which have not comletely failed yet
             ->andWhere(['NOT IN ', 'upcomingTask.id', self::failedQuery()->select('failedTask.id')])
 
-            #order by oldest failed then by oldest creation
+            # order by oldest failed then by oldest creation
             ->orderBy('upcomingTask.failed ASC, ' . 'upcomingTask.created ASC')
         ;
     }
@@ -481,7 +481,7 @@ class Task extends \yii\db\ActiveRecord
         foreach(array_keys(self::getAllPriorities()) as $prio) {
             $config = self::getConfig($prio);
 
-            $conditions[] = [
+            $cond = [
                 'and',
                 ['=', 'upcomingTask.priority', $prio],
                 ['<', 'upcomingTask.failed_count', $config['max_fetches']],
@@ -489,11 +489,63 @@ class Task extends \yii\db\ActiveRecord
                     'or',
                     ['<=', 'host.crawled', new Expression('NOW() - INTERVAL ' . $config['delay']. ' SECOND')],
                     ['IS', 'host.crawled', null]
-                ]
+                ],
             ];
+
+            if(isset($config['workingHours'])) {
+                $cond[] = [
+                    'or',
+
+                    # filter by timezones to ensure only valid timezones gets included
+                    ['IS', 'upcomingTask.timezone', null],
+                    ['IN', 'upcomingTask.timezone', static::filteredTimezones($config['workingHours'])],
+                ];
+            }
+
+
+            $conditions[] = $cond;
         }
 
         $query->andWhere($conditions);
+
         return $query;
+    }
+
+
+
+
+
+    /* returns an array of timezones in which the current working hour can be applied */
+    public static function filteredTimezones($workingHours = []) {
+        $tzs = timezone_identifiers_list();
+        
+
+        $tzs = array_filter($tzs, function($tz) use ($workingHours) {
+            # check if the current working hours match
+            $t = new DateTimeZone($tz);
+            $now = new DateTime('now', $t);
+            foreach($workingHours as $range) {
+                $start = new DateTime($now->format('Y-m-d') . ' ' . $range[0], $t);
+                $end = new DateTime($now->format('Y-m-d') . ' ' . $range[1], $t);
+                
+                # assume working hours are during midnight
+                if($end < $start) {
+                    $end->add(new DateInterval('P1D'));
+                }
+
+                # check if we are operating inside working hours for a given timezone
+                if(
+                    $start <= $now
+                    &&
+                    $end >= $now
+                ) {
+                    return true;
+                }
+            }
+
+            return false;
+        });
+
+        return $tzs;
     }
 }
