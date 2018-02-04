@@ -74,7 +74,8 @@ class Task extends \yii\db\ActiveRecord
             [['type'], 'in', 'range' => array_keys($this->getTypes())],
             [['priority'], 'in', 'range' => array_keys($this->getPriorities())],
             #[['priority'], 'string', 'max' => 255],
-            
+            [['timezone'], 'in', 'range' => timezone_identifiers_list()],
+
             [['host_id'], 'exist', 'skipOnError' => true, 'targetClass' => Host::className(), 'targetAttribute' => ['host_id' => 'id']],
             [['prioritized_task_id'], 'exist', 'skipOnError' => true, 'targetClass' => Task::className(), 'targetAttribute' => ['prioritized_task_id' => 'id']],
         ];
