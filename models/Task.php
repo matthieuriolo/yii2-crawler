@@ -316,7 +316,7 @@ class Task extends \yii\db\ActiveRecord
                 $curl->setRequestBody($this->data);
                 
                 $response = $curl->$type($this->url);
-                if(!$curl->errorCode) {
+                if(!$curl->errorCode && $curl->responseCode == 200) {
                     $dir = Yii::getAlias($module->filesDir);
                     FileHelper::createDirectory($dir);
 
