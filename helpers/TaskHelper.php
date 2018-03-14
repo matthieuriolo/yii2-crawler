@@ -44,9 +44,21 @@ class TaskHelper {
             $task->delete();
         }
     }
+
+    public static function cleanUpImported() {
+        $query = Task::find()
+            ->andWhere(['IS NOT', 'downloaded', null])
+            ->andWhere(['IS NOT', 'imported', null])
+        ;
+
+        foreach($query->each() as $task) {
+            $task->delete();
+        }
+    }
     
     public static function cleanup() {        
         self::cleanUpUnlock();
         self::cleanUpFailed();
+        self::cleanUpImported();
     }
 }
