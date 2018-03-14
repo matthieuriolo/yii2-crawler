@@ -95,6 +95,25 @@ $task->setMetaValue('class', CustomTaskInfo::className());
 $task->deleteMetaValue('typoClASssss');
 ```
 
+## Timezones
+
+The crawler can be setup to be aware of timezones/working hours. As result of this the crawler will only executes a task during a certain time period. Make sure that the task is set up properly with the timezone.
+
+```
+$task = new Task();
+$task->timezone = (new DateTimeZone('Europe/Paris'))->getName()
+# other stuff
+$task->save();
+```
+
+Every priority can be setup individually which working hours should be used. However the hours can also be set in the defaultPriority in the config file
+
+```
+'workingHours' => [
+    ['8:00', '12:00'],
+    ['13:00', '17:00'],
+],
+```
 
 ## Logging
 
