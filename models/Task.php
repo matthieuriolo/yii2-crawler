@@ -93,6 +93,8 @@ class Task extends \yii\db\ActiveRecord
             'data' => Yii::t('app', 'Data'),
             'priority' => Yii::t('app', 'Priority'),
             'host_id' => Yii::t('app', 'Host'),
+            'domain_id' => Yii::t('app', 'Domain'),
+            'expectedExecution' => Yii::t('app', 'Expected execution'),
             'created' => Yii::t('app', 'Created'),
             'imported' => Yii::t('app', 'Imported'),
             'locked' => Yii::t('app', 'Locked'),
@@ -131,6 +133,25 @@ class Task extends \yii\db\ActiveRecord
         }, $prios, array_keys($prios));
 
         return ArrayHelper::map($prios, 'id', 'label');
+    }
+
+    public function getExpectedExecution() {
+        if($this->failed !== null || $this->downloaded !== null) {
+            return null;
+        }
+
+        $prios = $this->priorities;
+
+        if(!isset($prios[$this->priority])) {
+            return null;
+        }
+
+        $prio = self::getConfig($this->priority);
+
+        $date = new DateTime($this->created, new DateTimeZone('UTC'));
+        $date->setTimestamp($date->getTimestamp() + $prio['delay']);
+
+        return $date->format('Y-m-d H:i:s');
     }
 
     public function getTypes() {

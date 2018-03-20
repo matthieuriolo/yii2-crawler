@@ -69,6 +69,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             
                             'timezone',
                             'created:datetime',
+                            'expectedExecution:datetime',
                             'locked:datetime',
                             'downloaded:datetime',
                             'imported:datetime',
