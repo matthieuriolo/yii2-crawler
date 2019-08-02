@@ -5,7 +5,7 @@ namespace app\modules\crawler\models;
 use Yii;
 use Exception;
 use DateTime;
-
+use DateTimeZone;
 
 use yii\db\Expression;
 use yii\helpers\FileHelper;
@@ -74,7 +74,8 @@ class Task extends \yii\db\ActiveRecord
             [['type'], 'in', 'range' => array_keys($this->getTypes())],
             [['priority'], 'in', 'range' => array_keys($this->getPriorities())],
             #[['priority'], 'string', 'max' => 255],
-            
+            [['timezone'], 'in', 'range' => timezone_identifiers_list()],
+
             [['host_id'], 'exist', 'skipOnError' => true, 'targetClass' => Host::className(), 'targetAttribute' => ['host_id' => 'id']],
             [['prioritized_task_id'], 'exist', 'skipOnError' => true, 'targetClass' => Task::className(), 'targetAttribute' => ['prioritized_task_id' => 'id']],
         ];
@@ -92,6 +93,8 @@ class Task extends \yii\db\ActiveRecord
             'data' => Yii::t('app', 'Data'),
             'priority' => Yii::t('app', 'Priority'),
             'host_id' => Yii::t('app', 'Host'),
+            'domain_id' => Yii::t('app', 'Domain'),
+            'expectedExecution' => Yii::t('app', 'Expected execution'),
             'created' => Yii::t('app', 'Created'),
             'imported' => Yii::t('app', 'Imported'),
             'locked' => Yii::t('app', 'Locked'),
@@ -130,6 +133,25 @@ class Task extends \yii\db\ActiveRecord
         }, $prios, array_keys($prios));
 
         return ArrayHelper::map($prios, 'id', 'label');
+    }
+
+    public function getExpectedExecution() {
+        if($this->failed !== null || $this->downloaded !== null) {
+            return null;
+        }
+
+        $prios = $this->priorities;
+
+        if(!isset($prios[$this->priority])) {
+            return null;
+        }
+
+        $prio = self::getConfig($this->priority);
+
+        $date = new DateTime($this->created, new DateTimeZone('UTC'));
+        $date->setTimestamp($date->getTimestamp() + $prio['delay']);
+
+        return $date->format('Y-m-d H:i:s');
     }
 
     public function getTypes() {
@@ -331,7 +353,9 @@ class Task extends \yii\db\ActiveRecord
                 $curl->setRequestBody($this->data);
                 
                 $response = $curl->$type($this->url);
-                if(!$curl->errorCode) {
+
+                
+                if(!$curl->errorCode && ($curl->responseCode >= 200 && $curl->responseCode < 400)) {
                     $dir = Yii::getAlias($module->filesDir);
                     FileHelper::createDirectory($dir);
 

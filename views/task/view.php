@@ -66,8 +66,10 @@ $this->params['breadcrumbs'][] = $this->title;
                                     ? Yii::$app->formatter->asText(null)
                                     : Html::a($model->prioritizedTask->id, ['view', 'id' => $model->prioritized_task_id])
                             ],
-
+                            
+                            'timezone',
                             'created:datetime',
+                            'expectedExecution:datetime',
                             'locked:datetime',
                             'downloaded:datetime',
                             'imported:datetime',

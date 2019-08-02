@@ -1,5 +1,6 @@
 <?php
 
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -17,6 +18,10 @@ use yii\widgets\ActiveForm;
     <?= $form->field($model, 'type')->dropDownList($model->types) ?>
 
     <?= $form->field($model, 'url')->textInput(['maxlength' => true]) ?>
+
+    <?= $form->field($model, 'timezone')->dropDownList(ArrayHelper::index(timezone_identifiers_list(), function($val) {
+    	return $val;
+    })); ?>
 
     <?= $form->field($model, 'data')->textarea(['class' => 'form-control max-width-100']) ?>
 

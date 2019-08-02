@@ -27,14 +27,12 @@ class Module extends \yii\base\Module {
         'clean_after' => 31104000, # seconds - seconds for a delayed deletion after failed download or imports
         'unlock_after' => 86400, # seconds - seconds for a delayed unlock
         
-        /*
         # this config allows you to make sure the crawler executes tasks during a certain time
         # remove the entry from the defaultPriority and the crawler will ignore it
         'workingHours' => [
             ['8:00', '12:00'],
-            ['13:00', '17:00'],
+            ['13:00', '17:30'],
         ],
-        */
 	];
 
 

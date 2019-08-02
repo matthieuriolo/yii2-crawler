@@ -166,7 +166,14 @@ class TaskController extends Controller {
         while(true) {
         	try {
 	        	if($crawler = Task::nextTask()) {
-	        		$msg = 'Processing url ' . $crawler->url;
+
+	        		$msg = 'Processing task ' 
+	        			. $crawler->id 
+	        			. '/' . $crawler->priority 
+	        			. '/' . date('Y-m-d H:i:s')
+	        			. "\n" . $crawler->url
+	        		;
+
 	        		$this->stdout($msg . "\n");
 	        		Yii::info($msg, 'crawler');
 
