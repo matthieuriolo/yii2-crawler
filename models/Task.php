@@ -164,6 +164,22 @@ class Task extends \yii\db\ActiveRecord
         return true;
     }
 
+    public function afterDelete() {
+        parent::afterDelete();
+
+        //clean up unused metas
+        $query = Meta::find()
+            ->joinWith(['task_Metas as task_Metas'], false)
+            ->andWhere(['IS', 'task_Metas.id', null])
+        ;
+        
+        foreach($query->each() as $meta) {
+            $meta->delete();
+        }
+
+        return true;
+    }
+
     public function getFileContent() {
         if($this->file) {
             return file_get_contents(Yii::getAlias(Yii::$app->getModule('crawler')->filesDir) . $this->file);
